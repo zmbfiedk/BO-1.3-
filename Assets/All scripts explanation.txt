@@ -1,0 +1,366 @@
+Update(movement)[20-03-2025]:
+Player Movement (WASD / Arrow Keys):
+The player is moved using WASD or the arrow keys.
+
+The movement direction is determined by applying Input.GetAxis("Horizontal") (left/right) and Input.GetAxis("Vertical") (up/down).
+
+These are scaled into a Vector3 to compute the movement direction (left-right, up-down).
+
+The Rigidbody velocity of the player is updated with the direction, applying a speed factor (moveSpeed).
+
+Code:
+float horizontal = Input.GetAxis("Horizontal");
+float vertical = Input.GetAxis("Vertical");
+Vector3 moveDirection = new Vector3(horizontal, 0, vertical).normalized
+rb.velocity = new Vector3(moveDirection.x * moveSpeed, rb.velocity.y, moveDirection.z * moveSpeed);
+2. Player Rotation (Face the Mouse):
+The player is constantly facing the mouse location.
+
+The direction towards the mouse by the player is calculated by Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position.
+
+This direction is utilized to calculate the angle (in degrees) to which the player needs to rotate to point towards the mouse.
+
+The player's rotation is then adjusted to this angle.
+
+Code:
+csharp
+Copy code
+Vector3 directionToMouse = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+directionToMouse.z = 0; // Don't pay attention to the Z-axis
+float angle = Mathf.Atan2(directionToMouse.y, directionToMouse.x) * Mathf.Rad2Deg;
+transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+
+Summary:
+Movement: Movement with keyboard input for movement within 2D space.
+
+Rotation: Turns the player so that the player is facing the mouse cursor utilizing vector math.
+
+This is a basic configuration for 2D game movement and aiming.
+
+Update(bullets, enemy and gun)[22-03-2025]:
+This script controls the movement of the bullet and detects its impact on the enemy.
+
+using UnityEngine;
+
+public class Bullet : MonoBehaviour
+{
+    public float lifetime = 2f; // Time until the bullet is destroyed (in seconds)
+    public float damage = 10f;  // Value of damage the bullet would cause (used in other cases, but has been left out of this example),
+    
+    void Start()
+{
+        Destroy(gameObject, lifetime); //销毁子弹后面 'lifetime' 秒
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))  // If the object collided with is tagged as "Enemy"
+        {
+Enemy enemy = collision.gameObject.GetComponent<Enemy>();  // Get the Enemy script from the collided object
+            if (enemy!= null)  // If the enemy script is found
+            {
+enemy.TakeDamage();  // Call the TakeDamage method on the enemy to inflict damage (kill it)
+            }
+
+        }
+
+        Destroy(gameObject);  // Destroy the bullet after collision
+} 
+How the Bullet Script Works:
+Lifetime of the Bullet:
+The bullet also contains a lifetime variable and decides how long it should last in the scene. In the Start() function, the Destroy(gameObject, lifetime) command allows for the bullet to be destroyed after the duration of time (lifetime seconds). This stops the bullet from remaining in the scene indefinitely.
+
+Collision Detection:
+When a bullet hits something, Unity calls the OnCollisionEnter2D() method. The method checks if the collided object has a tag of "Enemy".
+
+If the collided object is an enemy (i.e., its tag equals "Enemy"), it will try to get the Enemy script on the enemy object using GetComponent<Enemy>().
+
+If the enemy object has the Enemy script applied to it, then the bullet calls the TakeDamage() function on the enemy, which will reduce its health (or eliminate it, depending on the health of the enemy).
+
+Destroying the Bullet:
+After the collision has been triggered and the enemy taken care of (if necessary), the bullet destroys itself using Destroy(gameObject). This removes the bullet from the scene after colliding with the enemy.
+
+Enemy Script
+This script controls the behavior of the enemy, that is, how it responds to damage caused by the bullet.
+
+Full Enemy Script Code:
+
+public class Enemy : MonoBehaviour
+{
+    public int health = 1;  // Amount of hits enemy can take before being destroyed
+
+    public void TakeDamage()
+    {
+health--;  // Reduce the health of the enemy by 1 when it is hurt
+        if (health <= 0)  // If health is already 0 or less, kill the enemy
+        {
+            Die();
+}
+    }
+
+    void Die()
+    {
+        Destroy(gameObject);  // Destroy the enemy GameObject
+    }
+}
+How the Enemy Script Works:
+Health System:
+The enemy has a health variable that is set to 1 (i.e., it can sustain one hit before being destroyed). The TakeDamage() function lowers the health of the enemy by 1 when called (e.g., upon impact from a bullet).
+
+Taking Damage:
+The TakeDamage() method is public, hence accessible by other scripts. This function is utilized when the enemy is struck by a bullet. When the health of the enemy is 0 or below, the enemy will die using the Die() function.
+
+Die Method:
+The Die() function is the one that takes away the enemy from the game. It invokes Destroy(gameObject), which kills the entire enemy GameObject (i.e., takes it out of the scene when the enemy has no health left).
+
+Putting It All Together
+This is the way the Bullet and the Enemy communicate with each other:
+
+Bullet Fires:
+When the player shoots a bullet, it travels across the scene, moving forward in the direction that it's shot.
+
+Bullet Collides with Enemy:
+When the bullet collides with something in the game environment, the OnCollisionEnter2D method is invoked. It checks if the bullet has collided with a tagged "Enemy" object.
+
+Bullet Kills Enemy:
+If the bullet collides with an enemy, it checks if the enemy object has the Enemy script inside it. When it does, it invokes the TakeDamage() method of the Enemy script, which reduces the health of the enemy by 1.
+
+Enemy Dies:
+If the enemy's health is 0, the Die() method is called, which kills the enemy GameObject, thereby "killing" it.
+
+Bullet Destroyed:
+Once the bullet impacts the enemy (or any other object), it is destroyed by calling Destroy(gameObject) so that it does not stick around in the game world.
+
+Summary of Key Points:
+Bullet Script:
+
+The bullet collides with enemies and inflicts damage.
+
+After the collision, the bullet kills itself so that it does not stay in the scene.
+
+Enemy Script:
+
+The enemy is alive (has health), and when it gets damaged (when the bullet hits on it), it loses health.
+
+When health is 0, the enemy dies.
+
+With these two scripts, you can create a simple shooter where the player can shoot bullets that hit enemies, damage them, and kill them when they are killed. The bullet and the enemy interactions are made possible by Unity's collision detection system, so the game mechanics are simple to implement.
+
+Top-Down Shooting and Movement
+1. PlayerMovement Script (Player: controls movement and fire):
+This script controls player movement, rotation, and firing bullets in a top-down view.
+
+Full Code for PlayerMovement Script:
+csharp
+Copy code
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float moveSpeed = 5f;
+    public GameObject bulletPrefab;  // Prefab for the bullet to spawn when firing
+
+leave a space after each line
+public Transform shootingPoint;  // Where bullets are shot from (typically in front of the player)
+
+    private Vector2 moveDirection;  // Which direction the player is moving
+    private Rigidbody2D rb;         // Rigidbody2D for physics-based movement
+
+    void Start()
+rb = GetComponent<Rigidbody2D>();  // Retrieve the Rigidbody2D component that is currently attached to the player
+    }
+
+    void Update()
+    {
+        HandleMovement();  // Deal with player movement
+        HandleShooting();  // Deal with player shooting
+RotatePlayerToMouse();  // Rotate player to face the mouse pointer
+    }
+
+    void HandleMovement()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");  // Get horizontal input (A/D or Left/Right arrow keys)
+float vertical = Input.GetAxisRaw("Vertical");  // Get vertical input (W/S or Up/Down arrow keys)
+
+        moveDirection = new Vector2(horizontal, vertical).normalized;  // Normalize the direction to avoid faster diagonal movement
+        rb.velocity = moveDirection * moveSpeed;  // Move the player according to input and speed
+}
+
+    void HandleShooting()
+    {
+        if (Input.GetMouseButtonDown(0))  // If left mouse button is clicked
+        {
+            Shoot();
+        }
+    }
+
+    void Shoot()
+{
+        GameObject bullet = Instantiate(bulletPrefab, shootingPoint.position, Quaternion.identity);  // Instantiate a new bullet at the shooting point
+        Vector2 bulletDirection = (Camera.main.ScreenToWorldPoint(Input.mousePosition) - shootingPoint.position).normalized;  // Bullet direction to the mouse position
+bullet.GetComponent<Rigidbody2D>().velocity = bulletDirection * 10f;  // Shoot the bullet in the direction of the mouse at speed 10
+    }
+
+    void RotatePlayerToMouse()
+    {
+        Vector2 directionToMouse = (Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized;  // Direction from player to mouse
+float angle = Mathf.Atan2(directionToMouse.y, directionToMouse.x) * Mathf.Rad2Deg;  // Calculate the angle in degrees
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));  // Rotate the player to face the mouse
+    }
+}
+How the PlayerMovement Script Works:
+Movement:
+
+HandleMovement() receives the player input for horizontal and vertical movement using the Input.GetAxisRaw() function (reading from arrow keys or WASD keys).
+
+It scales the movement vector (to avoid diagonal movement being faster) and applies the movement to the Rigidbody2D component's velocity (rb.velocity), which actually does the physics-based movement.
+
+Shooting:
+
+HandleShooting() receives when the left mouse button has been clicked (via Input.GetMouseButtonDown(0)).
+
+Shoot() creates a bullet prefab at the shootingPoint (a GameObject in front of the player).
+
+The bullet is given a direction towards the mouse position, which is calculated by subtracting the shooting point position from the mouse position (screen-to-world conversion is needed here).
+
+The velocity of the bullet is given to move it in the direction of the mouse at a speed of 10f.
+
+Rotating Player to Mouse:
+
+RotatePlayerToMouse() calculates the angle from the player to the mouse position in world space using the Atan2 method.
+
+The calculated angle is then used to rotate the player by putting its transform.rotation to face the direction of the mouse.
+
+Camera Follow Script
+This script is utilized for camera following the player smoothly. It maintains the camera in top-down position and follows the player.
+
+Full Code for Camera Follow Script:
+csharp
+Copy code
+using UnityEngine;
+
+public class CameraFollow : MonoBehaviour
+{
+    public Transform player;  // The transform of the player (where the camera will follow)
+    public Vector3 offset;  // The offset from the camera to the player (e.g., how far behind or above the player the camera should be)
+    public float smoothSpeed = 0.125f;  // How fast the camera will follow the player
+
+void LateUpdate()
+    {
+        Vector3 desiredPosition = player.position + offset;  // Get the position the camera should move to, based on the player's position and the offset
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);  // Smoothly move from current position to the desired position
+transform.position = smoothedPosition;  // Assign the camera's position to the smoothed position
+}
+How the CameraFollow Script Works:
+Player Following:
+
+The camera is translated behind the player's position (player.position), but with an offset added to determine the relative position of the camera in relation to the player.
+
+The offset can be of the type (0, 0, -10) so that the camera is always 10 units behind the player along the Z-axis (perfect for top-down).
+
+Smooth Movement:
+
+Smooth movement is done by calling Vector3.Lerp(). Instead of jumping directly to where it should end up, it smoothly moves from where it is to where it needs to be at a speed determined by smoothSpeed.
+
+The camera moves smoothly towards the target position, giving it a "follow" effect without sudden jumps or shuddering.
+
+LateUpdate():
+
+LateUpdate() is invoked to move the camera because we need to make sure that the player has moved first (since the player's movement is done in Update()), and then the camera is updated later to avoid jittering.
+
+How Everything Fits Together
+Movement: The PlayerMovement script allows the player to move with the WASD or arrow keys. The movement is coupled with a Rigidbody2D to give it smooth, physics-based movement.
+
+Aiming: The player rotates towards the direction of the mouse position using the RotatePlayerToMouse() method. This makes the player face the direction of the mouse cursor at all times, making the game responsive and intuitive.
+
+Shooting: When the mouse (left button) is clicked, a bullet is created and travels towards the mouse location. This implements the fundamental shooting mechanism in the game.
+
+Camera Follow: The CameraFollow script makes the camera follow the player smoothly as he/she moves around the world. This provides a smooth game experience and allows the player to have a good view of the environment.
+
+Bullet Script Explanation
+For context, the bullet script handles the behavior of the bullet upon firing. When the bullet strikes an enemy, it causes damage (or any effect) and then destroys itself after some time or if it collides with an object.
+
+This is how the shooter interacts with the Bullet script:
+
+Instantiation: Upon firing by the player, a bullet prefab is instantiated at the shootingPoint in front of the player.
+
+Bullet Movement: The bullet moves in the direction of the mouse pointer with a pre-defined velocity.
+
+Collision Handling: The bullet collides with enemies (or any object) and damages or destroys them based on the collision.
+
+Bullet Lifetime: The bullet is destroyed after some lifetime to avoid it from lingering in the scene indefinitely.
+
+Summary of What Occurs in the Game:
+The player moves using WASD/arrow keys.
+
+The player rotates around the mouse location.
+
+When the player clicks the left mouse button, a bullet shoots in the direction of the mouse.
+
+The camera follows the player smoothly.
+
+The bullet hits enemies (or other objects), inflicting damage or destruction.
+
+
+Update(extra gun)[26-03-2025]:
+1. Shotgun Spread Shooting (ShootShotgun() Method)
+It is invoked when the player right-clicks (Input.GetMouseButtonDown(1)). It fires three bullets, with the middle bullet fired straight ahead and the other two fired at an angle to create a shotgun spread effect.
+
+For Loop (for (int i = -1; i <= 1; i++)):
+
+The loop executes 3 times: once for the bullet in front (i = 0), once for the left bullet (i = -1), and once for the right bullet (i = 1).
+
+Spread Angle (shotgunSpreadAngle):
+
+The shotgunSpreadAngle determines how far the bullets will be spread out. For example, if shotgunSpreadAngle is 15, then the bullets will be offset by -15, 0, and 15 degrees.
+
+Direction Vector Calculation:
+
+The spreadDirection is calculated by the player position minus the mouse position. The vector is from the player to the mouse and is then normalized so that the bullet moves at a constant speed.
+
+Angle Offset (angleOffset):
+
+In each iteration of the loop, the spread angle is utilized by multiplying i with the shotgunSpreadAngle. It generates different angles for all the bullets: one with default direction, one left-rotated, and one right-rotated.
+
+Rotation of the Direction Vector:
+
+RotateVector(spreadDirection, angleOffset) rotates the direction vector by the provided angle (angleOffset), giving every one of the bullets a distinct firing angle.
+
+Instantiation of the Bullets:
+
+Each bullet is instantiated where the shooting occurs. The direction of the bullet movement is set to rotatedDirection * bulletSpeed, i.e., each bullet is traveling in the direction it has been rotated, at the same speed.
+
+2. Rotation of a Vector (RotateVector() Function)
+This function is used to rotate the direction vector of the bullet by a certain amount so that the shotgun spread can work.
+
+Math for Rotation:
+
+The function uses basic 2D vector rotation mathematics:
+
+Cosine and Sine functions are used to determine the new X and Y coordinates of the direction vector after rotating it by the given angle (in degrees).
+
+The result is a new direction vector showing the rotated direction.
+
+3. Player Rotation to Mouse (RotatePlayerToMouse() Method)
+This method rotates the player towards the mouse cursor such that the player will have the feeling that it is aiming at the cursor.
+
+Direction to Mouse:
+
+Direction of the player towards the mouse is calculated by Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position. This gives the direction from the mouse position to the player position in world space.
+
+Angle Calculation:
+
+Mathf.Atan2(directionToMouse.y, directionToMouse.x) calculates the angle between the player and the mouse (in radians).
+
+Mathf.Rad2Deg converts this angle from radians to degrees to make it easily usable in Unity.
+
+Player Rotation:
+
+transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle)) turns the player to face the mouse by using the calculated angle on the player's transform.
+
+Summary of Added Code:
+Shotgun Spread: ShootShotgun() fires three bullets with a spread effect using a for loop. The bullets are rotated separately by some angle to get the spread.
+
+Vector Rotation: The RotateVector() function rotates a given direction vector by a given angle (used in order to determine the spread of shotgun shooting).
+
+Player Rotation: The RotatePlayerToMouse() function makes the player rotate in order to face the mouse, thereby producing the aiming effect.
