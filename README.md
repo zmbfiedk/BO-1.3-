@@ -31,5 +31,8 @@ You can find all the code for these mechanics in the following links:
 ## GIFs
 Here are the GIFs showcasing some of the mechanics:
 
-- [Movement & Shooting GIF 1](Assets/Gifs/ezgif-1050bc84d09653.gif)
-- [Movement & Shooting GIF 2](Assets/Gifs/ezgif-10b8570b8c750a.gif)
+### Movement & Shooting GIF 1
+![Movement & Shooting GIF 1](Gifs/ezgif-1050bc84d09653.gif)
+
+### Movement & Shooting GIF 2
+![Movement & Shooting GIF 2](Assets/Gifs/ezgif-10b8570b8c750a.gif)
