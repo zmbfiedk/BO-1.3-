@@ -178,6 +178,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 100
   enemyManager: {fileID: 0}
+  bulletPrefab: {fileID: 6830908237878431403, guid: 9105f0ea3eb721a408d52fe4b5a63be2, type: 3}
+  shootingPoint: {fileID: 1394824015315186038}
+  shootRate: 1
 --- !u!1 &5723563897246388923
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Boss : MonoBehaviour
+public class Enemy : MonoBehaviour
 {
     public int health = 1;
     public EnemyManager enemyManager;
@@ -14,8 +14,9 @@ public class Boss : MonoBehaviour
         }
     }
 
-    void Die()
+    public void Die()
     {
+        enemyManager.RegisterKill();
         Destroy(gameObject);
     }
 }
