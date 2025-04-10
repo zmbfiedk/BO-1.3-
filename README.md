@@ -1,17 +1,35 @@
+# Mechanics Plus Explanation
 
-# mechanics plus explanation
+In this section, I'll explain the mechanics used in the project and where I got the inspiration for each.
 
-So in this MD ill say all of the mechanics and where i got the inspirations
+## Movement
+The movement system was inspired by a YouTube tutorial I found a while ago while working on the first game project of this school year. It's a basic system that works well for 2D games and handles movement inputs for the player.
 
-movement: I made it by simply using a youtube tutorial wich i found a while ago as i was making the first game project of this school year
+## Shooting
+For the shooting mechanics, my friend, who has made similar games in the past, helped me. He explained how to set up the shooting system, including how bullets should be instantiated and how to manage their movement.
 
-shooting: My friend has made games like theese bfr and he explained me how to make all of the shooting mechanics.
+## Enemies
+The enemy system was designed from scratch by me, although I did use Google for some references and information on implementing certain elements. The code for the enemy AI and movement is entirely written by me.
 
-The enemies: that was a pretty basic system i used google for some things but the code was written by me
+## Enemy Check
+For the enemy check system, I used ChatGPT to guide me on which Unity tools would be most effective. ChatGPT helped me understand how to set up the enemy detection and how to optimize the system.
 
-enemy check: that i used CHATGPT so id know wich unity tools to use.
+## Boss
+The boss system is essentially a reuse of the enemy code with an extra function added for special behavior. I simply expanded on the original enemy code to create a more complex boss fight mechanic.
 
-Boss: simply reused the enemy code and added an extra function
+## Code Links
+You can find all the code for these mechanics in the following links:
 
+- [Boss.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/Boss.cs)
+- [BossBullet.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/Bossbullet.cs)
+- [Bullet.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/Bullet.cs)
+- [EnemyFollow.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/EnemyFollow.cs)
+- [EnemyManager.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/EnemyManager.cs)
+- [Movement.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/Movement.cs)
+- [Enemy.cs](https://github.com/zmbfiedk/BO-1.3-/blob/main/Assets/Scripts/enemy.cs)
 
+## GIFs
+Here are the GIFs showcasing some of the mechanics:
 
+- [Movement & Shooting GIF 1](Assets/Gifs/ezgif-1050bc84d09653.gif)
+- [Movement & Shooting GIF 2](Assets/Gifs/ezgif-10b8570b8c750a.gif)
